@@ -1,6 +1,6 @@
 const express = require("express");
 const dbConnect = require('./config/db.Connect');
-const dotenv =require('dotenv').config();
+const dotenv = require('dotenv').config();
 const cors = require("cors");
 // const cookieParser = require('cookie-parser');
 const multer = require("multer");
@@ -11,26 +11,39 @@ const PORT = process.env.PORT || 8080;
 // MongoDB Connection
 dbConnect();
 
+// Allowed origins
+const allowedOrigins = [
+  'https://stylux-gycx.onrender.com',
+  'https://stalwart-starburst-527e56.netlify.app'
+];
+
 // Middleware
 app.use(express.json());
-// app.use(cors({ origin: 'http://127.0.0.1:5173', credentials: true }));
-app.use(cors({ origin: 'https://stylux-gycx.onrender.com', credentials: true }));
 
-// app.use(cors());
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+};
+
+app.use(cors(corsOptions));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 // app.use(cookieParser());
 
-
-
 // Routes
 const authRoutes = require('./routes/authRoutes');
-app.use("/",authRoutes);
+app.use("/", authRoutes);
 
 const cartRoutes = require('./routes/cartRoutes');
-app.use("/cart",cartRoutes);
+app.use("/cart", cartRoutes);
 
 const emailRoutes = require('./routes/emailRoutes');
-app.use("/email",emailRoutes);
+app.use("/email", emailRoutes);
 
 // Start server
 app.listen(PORT, () => {
